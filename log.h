@@ -14,6 +14,15 @@
 #include <vector>
 #include <map>
 #include "singleton.h"
+
+
+/**
+ * @brief 使用流式方式将日志级别debug的日志写入logger
+ */
+
+
+
+
 namespace TinyWebFrame{
     class Logger;
     class LoggerManager;

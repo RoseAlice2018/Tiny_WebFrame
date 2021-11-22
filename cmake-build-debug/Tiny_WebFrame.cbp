@@ -84,6 +84,9 @@
 		<Unit filename="/Users/reebdeve/CLionProjects/Tiny_WebFrame/main.cpp">
 			<Option target="Tiny_WebFrame"/>
 		</Unit>
+		<Unit filename="/Users/reebdeve/CLionProjects/Tiny_WebFrame/singleton.h">
+			<Option target="Tiny_WebFrame"/>
+		</Unit>
 		<Unit filename="/Users/reebdeve/CLionProjects/Tiny_WebFrame/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>

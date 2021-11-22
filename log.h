@@ -9,20 +9,17 @@
 #include <stdint.h>
 #include <list>
 #include <sstream>
-
+#include <stdarg.h>
+#include <fstream>
+#include <vector>
+#include <map>
+#include
 namespace TinyWebFrame{
-    //Logger 日志输出器
-    class Logger{
-    public:
-        typedef std::shared_ptr<Logger> ptr;
-        Logger(const std::string& name = "root");
-        void Log(LogLevel::Level level,LogEvent::ptr event);
-
-    private:
-        std::string m_name;
-        LogLevel::Level m_level;
-        std::list<LogAppender::ptr> m_appenders;
-    };
+    class Logger;
+    class LoggerManager;
+    /**
+     * @brief 日志级别
+     */
     class LogLevel{
     public:
         /**
@@ -154,14 +151,54 @@ namespace TinyWebFrame{
         LogLevel::Level m_level;
     };
 
-    //Appender 日志输出至（目的地）
+    /**
+     * @brief 日志输出目标
+     */
     class LogAppender{
+        friend class Logger;
     public:
         typedef std::shared_ptr<LogAppender> ptr;
-        virtual ~LogAppender();
+        typedef Spinlock MutexType;
+        /**
+         * @brief 析构函数
+         */
+        virtual ~LogAppender(){};
+        /**
+         * @brief 写入日志
+         * @param[in] logger 日志器
+         * @param[in] level 日志级别
+         * @param[in] event 日志事件
+         */
+         virtual void log(std::shared_ptr<Logger> logger,
+                          LogLevel::Level level,LogEvent::ptr event) = 0;
+         /**
+          * @brief 将日志输出目标的配置转换成YAML String
+          */
+         virtual std::string toYamlString() = 0;
+          /**
+           * @brief 更改日志格式器
+           */
+         void setFormatter(LogFormatter::ptr val);
+         /**
+          * @brief 获取日志格式器
+          */
+         LogFormatter::ptr getFormatter();
 
-    private:
+         /**
+          * @brief 获取日志级别
+          */
+         LogLevel::Level getLevel()const{return m_level;}
 
+
+    protected:
+        //日志级别
+        LogLevel::Level m_level = LogLevel::DEBUG;
+         //是否有自己的日志格式器
+         bool m_hasFormatter = false;
+         //Mutex
+         MutexType m_mutex;
+         //日志格式器
+         LogFormatter::ptr m_formatter;
     };
     //Formatter
     class LogFormatter{
@@ -240,7 +277,178 @@ namespace TinyWebFrame{
         std::vector<FormatItem::ptr> m_items;
         //是否有错误
         bool m_error= false;
+
     };
+    /**
+     * @brief 日志器
+     */
+class Logger:public std::enable_shared_from_this<Logger>{
+    friend class LoggerManager;
+public:
+    typedef std::shared_ptr<Logger> ptr;
+    typedef Spinlock  MutexType;
+
+    /**
+     * @brief 构造函数
+     * @param[in] name 日志器名称
+     */
+     Logger(const std::string& name = "root");
+
+     /**
+      * @brief 写日志
+      * @param[in] level 日志级别
+      * @param[in] event 日志事件
+      */
+      void log(LogLevel::Level level,LogEvent::ptr event);
+
+      /**
+       * @brief 写debug级别日志
+       * @param[in] event 日志事件
+       */
+       void debug(LogEvent::ptr event);
+       /**
+        * @brief 写info级别日志
+        * @param[in] event 日志事件
+        */
+        void info(LogEvent::ptr event);
+        /**
+         * @brief 写warn级别日志
+         * @param[in]  event 日志事件
+         */
+         void warn(LogEvent::ptr event);
+         /**
+          * @brief 写error级别日志
+          * @param[in] event 日志事件
+          */
+          void error(LogEvent::ptr event);
+         /**
+          * @brief 写fatal级别日志
+          * @param[in] event 日志事件
+          */
+          void fatal(LogEvent::ptr event);
+         /**
+          * @brief 添加日志目标
+          * @param[in] appender 日志目标
+          */
+          void addAppender(LogAppender::ptr appender);
+         /**
+          * @brief 删除日志目标
+          * @param[in] appender 日志目标
+          */
+          void delAppender(LogAppender::ptr appender);
+         /**
+          * @brief 清空日志目标
+          */
+          void clearAppender();
+         /**
+          * @brief 返回日志级别
+          */
+          LogLevel::Level getLevel()const{return m_level;}
+
+         /**
+          * @brief 设置日志级别
+          */
+          void setLevel(LogLevel::Level val){m_level = val;}
+
+         /**
+          * @brief 返回日志名称
+          */
+         const std::string& getName()const{return m_name;}
+        /**
+         * @brief 设置日志格式器
+         */
+         void setFormatter(LogFormatter::ptr val);
+        /**
+         * @brief 设置日志格式模版
+         */
+         void setFormatter(const std::string& val);
+        /**
+         * @brief 获取日志格式器
+         */
+         LogFormatter::ptr getFormatter();
+         /**
+          * @brief 将日志器的配置转成YAML String
+          */
+         std::string toYamlString();
+private:
+    //日志名称
+    std::string m_name;
+    //日志级别
+    LogLevel::Level m_level;
+    //Mutex
+    MutexType m_mutex;
+    //日志目标集合
+    std::list<LogAppender::ptr> m_appenders;
+    //日志格式器
+    LogFormatter::ptr m_formatter;
+    //主日志器
+    Logger::ptr m_root;
+};
+    /**
+     * @brief 输出到控制台到Appender
+     */
+    class StdoutLogAppender:public LogAppender{
+    public:
+        typedef std::shared_ptr<StdoutLogAppender> ptr;
+        void log(Logger::ptr logger,LogLevel::Level,LogEvent::ptr event)override;
+    };
+    /**
+     * @brief   输出到文件到Appender
+     */
+    class FileLogAppender:public LogAppender{
+    public:
+        typedef std::shared_ptr<FileLogAppender> ptr;
+        FileLogAppender(const std::string& filename);
+        void log(Logger::ptr logger,LogLevel::Level level,LogEvent::ptr event)override;
+        /**
+         * @brief 重新打开日志文件
+         * @return 成功返回true
+         */
+         bool reopen();
+    private:
+        //文件路径
+        std::string m_filename;
+        //文件流
+        std::ofstream m_filestream;
+        //上次重新打开时间
+        uint64_t m_lastTime = 0;
+    };
+    /**
+     * @brief 日志器管理类
+     */
+     class LoggerManager{
+     public:
+         typedef Spinlock MutexType;
+         /**
+          * @brief 构造函数
+          */
+          LoggerManager();
+          /**
+           * @brief 获取日志器
+           * @param[in] name 日志器名称
+           */
+           Logger::ptr getLogger(const std::string& name);
+          /**
+           * @brief 初始化
+           */
+           void init();
+          /**
+           * @brief 返回主日志器
+           */
+           Logger::ptr getRoot()const{return m_root;}
+          /**
+           * @brief 将所有的日志器配置转成YAML String
+           */
+          std::string toYamlString();
+     private:
+         //Mutex
+         MutexType m_mutex;
+         //日志器容器
+         std::map<std::string ,Logger::ptr>m_loggers;
+         //主日志器
+         Logger::ptr m_root;
+     };
+     /// 日志器管理类单例模式
 
 }
 

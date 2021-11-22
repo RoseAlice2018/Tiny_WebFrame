@@ -13,7 +13,7 @@
 #include <fstream>
 #include <vector>
 #include <map>
-#include
+#include "singleton.h"
 namespace TinyWebFrame{
     class Logger;
     class LoggerManager;
@@ -449,7 +449,7 @@ private:
          Logger::ptr m_root;
      };
      /// 日志器管理类单例模式
-
+    typedef TinyWebFrame::Singleton<LoggerManager> LoggerMgr;
 }
 
 #endif //TINY_WEBFRAME_LOG_H

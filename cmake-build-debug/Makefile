@@ -129,6 +129,30 @@ Tiny_WebFrame/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Tiny_WebFrame.dir/build.make CMakeFiles/Tiny_WebFrame.dir/build
 .PHONY : Tiny_WebFrame/fast
 
+log.o: log.cpp.o
+.PHONY : log.o
+
+# target to build an object file
+log.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Tiny_WebFrame.dir/build.make CMakeFiles/Tiny_WebFrame.dir/log.cpp.o
+.PHONY : log.cpp.o
+
+log.i: log.cpp.i
+.PHONY : log.i
+
+# target to preprocess a source file
+log.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Tiny_WebFrame.dir/build.make CMakeFiles/Tiny_WebFrame.dir/log.cpp.i
+.PHONY : log.cpp.i
+
+log.s: log.cpp.s
+.PHONY : log.s
+
+# target to generate assembly for a file
+log.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Tiny_WebFrame.dir/build.make CMakeFiles/Tiny_WebFrame.dir/log.cpp.s
+.PHONY : log.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -162,6 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Tiny_WebFrame"
+	@echo "... log.o"
+	@echo "... log.i"
+	@echo "... log.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

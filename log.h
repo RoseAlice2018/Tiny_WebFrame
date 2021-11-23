@@ -79,6 +79,7 @@
  */
 #define SYLAR_LOG_NAME(name) TinyWebFrame::LoggerMgr::GetInstance()->getLogger(name)
 
+class ptr;
 namespace TinyWebFrame{
     class Logger;
     class LoggerManager;
@@ -217,6 +218,114 @@ namespace TinyWebFrame{
     };
 
     /**
+     * @brief 日志事件包装器
+     */
+     class LogEventWrap{
+     public:
+         /**
+          * @brief 构造函数
+          * @param[in] e 日志事件
+          */
+          LogEventWrap(LogEvent::ptr e);
+          /**
+           * @brief 析构函数
+           */
+           ~LogEventWrap();
+           /**
+            * @brief 获取日志事件
+            */
+            LogEvent::ptr getEvent() const{return m_event;}
+            /**
+             * @brief 获取日志内容流
+             */
+             std::stringstream& getSS();
+     private:
+         /**
+          * @brief 日志事件
+          */
+          LogEvent::ptr m_event;
+     };
+
+    //Formatter
+    class LogFormatter{
+    public:
+        typedef std::shared_ptr<LogFormatter> ptr;
+        /**
+         * @brief 构造函数
+         * @params[in] pattern 格式模版
+         * @details
+         * %m 消息
+         * %p 日志级别
+         * %c 日志名称
+         * %t 线程id
+         * %n 换行
+         * %d 时间
+         * %f 文件名
+         * %l 行号
+         * %T 制表符
+         * %F 协程id
+         * %N 线程名称
+         *
+         * 默认格式 "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%f:%l%T%m%n"
+         */
+        LogFormatter(const std::string& pattern);
+
+        /**
+         * @brief 返回格式化日志文本
+         * @param[in] logger 日志器
+         * @param[in] level  日志级别
+         * @param[in] event  日志事件
+         */
+        std::string format(std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event);
+        std::ostream& format(std::ostream& ofs,std::shared_ptr<Logger> logger,LogLevel::Level level,
+                             LogEvent::ptr event);
+
+    public:
+        /**
+         * @brief 日志内容格式化
+         */
+        class FormatItem
+        {
+        public:
+            typedef std::shared_ptr<FormatItem> ptr;
+            /**
+             * @brief 析构函数
+             */
+            virtual ~FormatItem();
+            /**
+             * @brief 格式化日志到流
+             * @param[in,out] os 日志输出流
+             * @param[in] logger 日志器
+             * @param[in] level 日志等级
+             * @param[in] event 日志事件
+             */
+            virtual void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,
+                                LogEvent::ptr event) = 0;
+        };
+
+        /**
+         *@brief 初始化，解析日志模版
+         */
+        void init();
+
+        /**
+         * @brief 是否有错误
+         */
+        bool isError()const {return m_error;}
+        /**
+         * @brief 返回日志模版
+         */
+        const std::string getPattern() const {return m_pattern;}
+    private:
+        //日志格式模版
+        std::string m_pattern;
+        //日志格式解析后格式
+        std::vector<FormatItem::ptr> m_items;
+        //是否有错误
+        bool m_error= false;
+
+    };
+    /**
      * @brief 日志输出目标
      */
     class LogAppender{
@@ -264,85 +373,6 @@ namespace TinyWebFrame{
          MutexType m_mutex;
          //日志格式器
          LogFormatter::ptr m_formatter;
-    };
-    //Formatter
-    class LogFormatter{
-    public:
-        typedef std::shared_ptr<LogFormatter> ptr;
-        /**
-         * @brief 构造函数
-         * @params[in] pattern 格式模版
-         * @details
-         * %m 消息
-         * %p 日志级别
-         * %c 日志名称
-         * %t 线程id
-         * %n 换行
-         * %d 时间
-         * %f 文件名
-         * %l 行号
-         * %T 制表符
-         * %F 协程id
-         * %N 线程名称
-         *
-         * 默认格式 "%d{%Y-%m-%d %H:%M:%S}%T%t%T%N%T%F%T[%p]%T[%c]%f:%l%T%m%n"
-         */
-         LogFormatter(const std::string& pattern);
-
-         /**
-          * @brief 返回格式化日志文本
-          * @param[in] logger 日志器
-          * @param[in] level  日志级别
-          * @param[in] event  日志事件
-          */
-          std::string format(std::shared_ptr<Logger> logger,LogLevel::Level level,LogEvent::ptr event);
-          std::ostream& format(std::ostream& ofs,std::shared_ptr<Logger> logger,LogLevel::Level level,
-                               LogEvent::ptr event);
-
-    public:
-        /**
-         * @brief 日志内容格式化
-         */
-        class FormatItem
-        {
-        public:
-            typedef std::shared_ptr<FormatItem> ptr;
-            /**
-             * @brief 析构函数
-             */
-             virtual ~FormatItem();
-             /**
-              * @brief 格式化日志到流
-              * @param[in,out] os 日志输出流
-              * @param[in] logger 日志器
-              * @param[in] level 日志等级
-              * @param[in] event 日志事件
-              */
-              virtual void format(std::ostream& os,std::shared_ptr<Logger> logger,LogLevel::Level level,
-                                  LogEvent::ptr event) = 0;
-        };
-
-        /**
-         *@brief 初始化，解析日志模版
-         */
-         void init();
-
-         /**
-          * @brief 是否有错误
-          */
-         bool isError()const {return m_error;}
-         /**
-          * @brief 返回日志模版
-          */
-         const std::string getPattern() const {return m_pattern;}
-    private:
-        //日志格式模版
-        std::string m_pattern;
-        //日志格式解析后格式
-        std::vector<FormatItem::ptr> m_items;
-        //是否有错误
-        bool m_error= false;
-
     };
     /**
      * @brief 日志器

@@ -78,6 +78,9 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/Users/reebdeve/CLionProjects/Tiny_WebFrame/log.cpp">
+			<Option target="Tiny_WebFrame"/>
+		</Unit>
 		<Unit filename="/Users/reebdeve/CLionProjects/Tiny_WebFrame/log.h">
 			<Option target="Tiny_WebFrame"/>
 		</Unit>

@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/Tiny_WebFrame.dir/log.cpp.o"
   "CMakeFiles/Tiny_WebFrame.dir/main.cpp.o"
   "Tiny_WebFrame"
   "Tiny_WebFrame.pdb"

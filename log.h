@@ -19,9 +19,65 @@
 /**
  * @brief 使用流式方式将日志级别debug的日志写入logger
  */
+#define SYLAR_LOG_LEVEL(logger,level) \
+    if(logger->getLevel() <= level)   \
 
+/**
+ * @brief 使用流式方式将日志级别level的日志写入到logger
+ */
+#define SYLAR_LOG_DEBUG(logger) SYLAR_LOG_LEVEL(logger,TinyWebFrame::LogLevel::DEBUG)
 
+/**
+ * @brief 使用流式方式将日志级别info的日志写入到logger
+ */
+#define SYLAR_LOG_INFO(logger) SYLAR_LOG_LEVEL(logger,TinyWebFrame::LogLevel::INFO)
+/**
+ * @brief 使用流式方式将日志级别warn到日志写入到logger
+ */
+#define SYLAR_LOG_WARN(logger) SYLAR_LOG_LEVEL(logger,TinyWebFrame::LogLevel::WARN)
+/**
+ * @brief 使用流式方式将日志级别error的日志写入到logger
+ */
+#define SYLAR_LOG_ERROR(logger) SYLAR_LOG_LEVEL(logger,TinyWebFrame::LogLevel::ERROR)
+/**
+ * @brief 使用流式方式将日志级别fatal的日志写入到logger
+ */
+#define SYLAR_LOG_FATAL(logger) SYLAR_LOG_LEVEL(logger,TinyWebFrame::LogLevel::FATAL)
 
+/**
+ * @brief 使用格式化方式将日志级别level的日志写入到logger
+ */
+
+/**
+ * @brief 使用格式化的方式将日志级别debug的日志写入到logger
+ */
+#define SYLAR_LOG_FMT_DEBUG(logger,fmt,...)SYLAR_LOG_FMT_LEVEL(logger,TinyWebFrame::LogLevel::DEBUG,fmt,_VA_ARGS_)
+
+/**
+ * @brief 使用格式化的方式将日志级别info的日志写入到logger
+ */
+#define SYLAR_LOG_FMT_INFO(logger,fmt,...)SYLAR_LOG_FMT_LEVEL(logger,TinyWebFrame::LogLevel::INFO,fmt,_VA_ARGS_)
+/**
+ * @brief 使用格式化的方式将日志级别warn的日志写入到logger
+ */
+#define SYLAR_LOG_FMT_WARN(logger,fmt,...)SYLAR_LOG_FMT_LEVEL(logger,TinyWebFrame::LogLevel::WARN,fmt,_VA_ARGS_)
+/**
+ * @brief 使用格式化的方式将日志级别error的日志写入到logger
+ */
+#define SYLAR_LOG_FMT_ERROR(logger,fmt,...)SYLAR_LOG_FMT_LEVEL(logger,TinyWebFrame::LogLevel::ERROR,fmt,_VA_ARGS_)
+/**
+ * @brief 使用格式化的方式将日志级别fatal的日志写入到logger
+ */
+#define SYLAR_LOG_FMT_FATAL(logger,fmt,...)SYLAR_LOG_FMT_LEVEL(logger,TinyWebFrame::LogLevel::FATAL,fmt,_VA_ARGS_)
+
+/**
+ * @brief 获取主日志器
+ */
+#define SYLAR_LOG_ROOT() TinyWebFrame::LoggerMgr::GetInstance()->getRoot()
+/**
+ * @brief 获取name的日志器
+ */
+#define SYLAR_LOG_NAME(name) TinyWebFrame::LoggerMgr::GetInstance()->getLogger(name)
 
 namespace TinyWebFrame{
     class Logger;

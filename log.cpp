@@ -537,6 +537,16 @@ void LogFormatter::init() {
 
 }
 
+LoggerManager::LoggerManager() {
+    m_root.reset(new Logger);
+    m_root->addAppender(LogAppender::ptr(new StdoutLogAppender));
+
+    m_loggers[m_root->m_name] = m_root;
+
+    init();
+}
+
+
 Logger::ptr LoggerManager::getLogger(const std::string &name) {
     MutexType::Lock lock(m_mutex);
     auto it = m_loggers.find(name);

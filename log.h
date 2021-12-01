@@ -434,7 +434,7 @@ public:
          /**
           * @brief 清空日志目标
           */
-          void clearAppender();
+          void clearAppenders();
          /**
           * @brief 返回日志级别
           */
@@ -485,7 +485,8 @@ private:
     class StdoutLogAppender:public LogAppender{
     public:
         typedef std::shared_ptr<StdoutLogAppender> ptr;
-        void log(Logger::ptr logger,LogLevel::Level,LogEvent::ptr event)override;
+        void log(Logger::ptr logger,LogLevel::Level level,LogEvent::ptr event)override;
+        std::string toYamlString() override;
     };
     /**
      * @brief   输出到文件到Appender
